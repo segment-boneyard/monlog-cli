@@ -1,0 +1,110 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependenciclient.
+ */
+
+var humanize = require('humanize-number');
+var inspect = require('util').inspect;
+var program = require('commander');
+var pkg = require('../package');
+var moment = require('moment');
+var fmt = require('printf');
+var Client = require('..');
+
+// options
+
+program
+  .version(pkg.version)
+  .usage('[options] [query]')
+  .option('-u, --url <url>', 'monlog url')
+  .option('-f, --tail', 'tail the log')
+  .parse(process.argv);
+
+// size
+
+var size = process.stdout.getWindowSize();
+var cols = size[0];
+var rows = size[1];
+
+// query
+
+var str = program.args.join(' ');
+
+// setup
+
+var client = new Client({
+  url: program.url
+});
+
+// --tail
+
+if (program.tail) return tail(str);
+
+/**
+ * Tail with the given query `str`.
+ */
+
+function tail(str, prev) {
+  var now = Date.now();
+  var prev = prev || now;
+
+  var range = ' timestamp:[' + prev + ' TO ' + now + ']';
+  var query = client.query(str + range);
+
+  query.on('data', output);
+
+  query.on('end', function(){
+    tail(str, now);
+  });
+}
+
+// query
+
+var query = client.query(str);
+
+// output
+
+query.on('data', function(log){
+  output(log, { format: 'MMMM Do, h:mm:ssa' });
+});
+
+query.on('end', function(){
+  console.log();
+});
+
+/**
+ * Output `log`.
+ */
+
+function output(log, opts) {
+  opts = opts || {};
+  var format = opts.format || 'hh:mm:ssa';
+  var date = moment(log.timestamp).format(format);
+  var host = log.hostname;
+  var msg = log.message;
+  var level = log.level;
+  var type = log.type;
+
+  var color = '0';
+  if ('warn' == level) color = '33';
+  if ('error' == level) color = '31';
+  if ('fatal' == level) color = '31';
+
+  msg = inspect(msg, { colors: true, depth: Infinity });
+
+  console.log();
+  console.log(hr());
+  console.log('  \033[' + color + 'm%s\033[m | %s | %s | %s', level, host, type, date);
+  console.log(hr());
+  console.log();
+  console.log(msg.replace(/^/gm, '  '));
+}
+
+/**
+ * Return a horizontal rule.
+ */
+
+function hr() {
+  return '\033[90m' + Array(cols).join('-') + '\033[m';
+}
