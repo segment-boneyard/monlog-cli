@@ -43,6 +43,7 @@ Monlog.prototype.query = function(str, opts){
 
   var req = request.get(url);
 
+  req.set('Content-Length', Buffer.byteLength(str));
   req.write(str);
 
   req.end(function(err, res){
