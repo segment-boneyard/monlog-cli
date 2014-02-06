@@ -41,12 +41,10 @@ Monlog.prototype.query = function(str, opts){
   var url = this.url;
   opts = opts || {};
 
-  var req = request.get(url);
-
-  req.set('Content-Length', Buffer.byteLength(str));
-  req.write(str);
-
-  req.end(function(err, res){
+  request
+  .get(url)
+  .query({ query: str })
+  .end(function(err, res){
     if (err) return e.emit('error', err);
     if (res.error) return e.emit('error', res.error);
 
