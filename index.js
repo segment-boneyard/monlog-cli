@@ -28,6 +28,23 @@ function Monlog(opts) {
 }
 
 /**
+ * Respond with stats.
+ *
+ * @param {Function} fn
+ * @api public
+ */
+
+Monlog.prototype.stats = function(fn){
+  request
+  .get(this.url + '/stats')
+  .end(function(err, res){
+    if (err) return fn(err);
+    if (res.error) return fn(res.error);
+    fn(null, res.body);
+  });
+};
+
+/**
  * Query with `str` and return an emitter.
  *
  * @param {String} str

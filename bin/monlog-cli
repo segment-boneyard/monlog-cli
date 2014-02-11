@@ -19,6 +19,7 @@ program
   .usage('[options] [query]')
   .option('-u, --url <url>', 'monlog url')
   .option('-f, --tail', 'tail the log')
+  .option('-s, --stats', 'output stats')
   .parse(process.argv);
 
 // size
@@ -36,6 +37,17 @@ var str = program.args.join(' ');
 var client = new Client({
   url: program.url
 });
+
+// --stats
+
+if (program.stats) {
+  return client.stats(function(err, stats){
+    if (err) throw err;
+    console.log();
+    console.log('  count: %s', humanize(stats.count));
+    console.log();
+  });
+}
 
 // --tail
 
