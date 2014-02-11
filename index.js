@@ -39,11 +39,13 @@ function Monlog(opts) {
 Monlog.prototype.query = function(str, opts){
   var e = new Emitter;
   var url = this.url;
+
   opts = opts || {};
+  opts.query = str;
 
   request
   .get(url)
-  .query({ query: str })
+  .query(opts)
   .end(function(err, res){
     if (err) return e.emit('error', err);
     if (res.error) return e.emit('error', res.error);

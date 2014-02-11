@@ -46,16 +46,24 @@ if (program.tail) return tail(str);
  */
 
 function tail(str, prev) {
-  var now = Date.now();
-  var prev = prev || now;
+  var opts = {};
 
-  var range = ' timestamp:[' + prev + ' TO ' + now + ']';
-  var query = client.query(str + range);
+  // from
+  var now = Date.now();
+  opts.from = prev || now;
+
+  // limit
+  opts.limit = prev ? 0 : 1;
+
+  // query
+  var query = client.query(str, opts);
 
   query.on('data', output);
 
   query.on('end', function(){
-    tail(str, now);
+    setTimeout(function(){
+      tail(str, now);
+    }, 100);
   });
 }
 
