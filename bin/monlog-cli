@@ -53,7 +53,7 @@ function tail(str, prev) {
   opts.from = prev || now;
 
   // limit
-  opts.limit = prev ? 0 : 1;
+  opts.limit = 0;
 
   // query
   var query = client.query(str, opts);
