@@ -63,7 +63,7 @@ function tail(str, prev) {
   query.on('end', function(){
     setTimeout(function(){
       tail(str, now);
-    }, 100);
+    }, 200);
   });
 }
 
